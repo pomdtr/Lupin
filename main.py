@@ -20,20 +20,20 @@ from hypothesis import getHypothesisAnnotations
 
 def start(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['WELCOME_MESSAGE'].format(BotName)) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['WELCOME_MESSAGE'].format(BotName)) 
 
 def uptime(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
         message = "I've been up for %d days, %d hours, %d minutes, %d seconds" % getUptime()
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=message) 
 
 def addEntry(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
         updateJournal(update.message.text)
         context.bot.send_message(chat_id=update.effective_chat.id,
@@ -41,24 +41,24 @@ def addEntry(update, context):
 
 def version(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['VER_MESSAGE'].format(BotName,getBotVersion())) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['VER_MESSAGE'].format(BotName,getBotVersion())) 
 
 def help(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
         commands = ["/help","/start","/uptime","/ver","/anno"]
         message = bot_messages['HELP_MESSAGE']
         for command in commands:
             message += command + "\n"
         
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=message) 
 
 def hypothesis(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
         if(isManageHypothesis()):
             path = getAnnotationPath(context.args[0])
@@ -79,7 +79,7 @@ def hypothesis(update, context):
     
 def image_handler(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
         # print ( context.bot.getFile(update.message.photo[-1]))
         file = context.bot.getFile(update.message.photo[-1].file_id)
@@ -87,13 +87,13 @@ def image_handler(update, context):
         path = updateAsset(f.getvalue(),"jpg")
         updateJournal(path, ignoreURL=True, isJournalFile=False)
         
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['IMAGEUPLOAD_MESSAGE'].format(BotName,getBotVersion())) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['IMAGEUPLOAD_MESSAGE'].format(BotName,getBotVersion())) 
 
 def generateMD(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['FILEREQ_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['FILEREQ_MESSAGE']) 
         PageName = str(' '.join(context.args))
         
         s = StringIO()
@@ -110,11 +110,11 @@ def generateMD(update, context):
 
 def generateMinmapHTML(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
         PageName = str(' '.join(context.args))
         if PageName:
-            context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['FILEREQ_MESSAGE']) 
+            context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['FILEREQ_MESSAGE']) 
 
 
             MindMap = convert2Mindmap(PageName)
@@ -161,13 +161,13 @@ def generateMinmapHTML(update, context):
 
                 context.bot.send_document(chat_id=update.message.chat_id, document=buf)
             else:
-                context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['FILENOTFOUND_MESSAGE'].format(PageName)) 
+                context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['FILENOTFOUND_MESSAGE'].format(PageName)) 
         else:
-            context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['NOPAGEMM_MESSAGE']) 
+            context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['NOPAGEMM_MESSAGE']) 
             
 def listAllThemes(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
         AllThemes = getAllThemes()
         button_list = []
@@ -177,7 +177,7 @@ def listAllThemes(update, context):
             i+=1
         button_list.append([InlineKeyboardButton(btns['CANCEL'], callback_data=btns['CANCEL'])])
         reply_markup =  InlineKeyboardMarkup(button_list)
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['PICKTHEME_MESSAGE'], reply_markup=reply_markup) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['PICKTHEME_MESSAGE'], reply_markup=reply_markup) 
 
 def ThemeSwitcher(update, context):
     args = update.callback_query.data.split('_')
@@ -206,13 +206,13 @@ def ShowSkipCancelMenu(update, context, uid):
     message = bot_messages['LINE_BREAK'] + "\n\n" + context.user_data[uid][0].question + "\n" + bot_messages['LINE_BREAK'] + "\n" 
     message += bot_messages['FLASHCARD_OPTIONS']
     reply_markup =  InlineKeyboardMarkup(button_list)
-    context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message, reply_markup=reply_markup) 
+    context.bot.send_message(chat_id=update.effective_chat.id, text=message, reply_markup=reply_markup) 
 
 def ShowAnswer(update,context):
     uid = update.callback_query.data.replace(btns['SHOW_ANSWER'],'')
     flashcard = context.user_data[uid][0]
     message = flashcard.answer + "\n" + bot_messages['FLASHCARD_SOURCE'] + flashcard.source 
-    context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message) 
+    context.bot.send_message(chat_id=update.effective_chat.id, text=message) 
 
 def AnswerHandler(update, context):
     args = update.callback_query.data.split('_')
@@ -233,7 +233,7 @@ def AnswerHandler(update, context):
         context.user_data[uid] = [flashcard, roundCount, roundGoal]
         TimeSpacedRepetition(update, context, uid)
     else:
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text="All Done for Today ") 
+        context.bot.send_message(chat_id=update.effective_chat.id, text="All Done for Today ") 
 
 def Cancel(update,context):
     context.bot.edit_message_text(
@@ -253,7 +253,7 @@ def Skip(update, context):
 
 def TimeSpacedRepetition(update, context, uid=""):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
         try:
             arg = context.args[0]
@@ -277,27 +277,27 @@ def TimeSpacedRepetition(update, context, uid=""):
             flashcard = flashcards.getFlashcardFromPool()
             if(flashcard):
                 message = "Card " + str(roundCount) + " out of " + str(roundGoal) + "\n" 
-                context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message) 
+                context.bot.send_message(chat_id=update.effective_chat.id, text=message) 
                 context.user_data[uid] = [flashcard, roundCount, roundGoal]
                 return ShowSkipCancelMenu(update, context, uid)
             else:
-                context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['NOPENDIGCARDS_MESSAGE'])  
+                context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['NOPENDIGCARDS_MESSAGE'])  
 
 def tsrRetired(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
         message = "command /tsr is being replace by /srs please use the latter from now on"
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=message) 
 
 def importFlashCards(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['IMPORTINGFC_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['IMPORTINGFC_MESSAGE']) 
         importResults = updateFlashCards()
         message = bot_messages['IMPORTEDFC_MESSAGE'].format(importResults[0],importResults[1])
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=message) 
 
 def scheduleHousekeeping(chat_id, context):
     context.job_queue.run_repeating(scheduledHousekeeping, interval=getGitHubUpdateFrequency(), first=10,
@@ -315,29 +315,29 @@ def scheduledHousekeeping():
 
 def pullnow(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
         print("Unscheduled Housekeeping ...")
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['PULL_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['PULL_MESSAGE']) 
         Git2Json() 
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['PULLDONE_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['PULLDONE_MESSAGE']) 
 
 def encryptall(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['ENCRYPTINGRAPH_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['ENCRYPTINGRAPH_MESSAGE']) 
         encryptGraph()
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['ENCRYPTDONE_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['ENCRYPTDONE_MESSAGE']) 
 
 
 def decryptall(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['DECRYPTINGRAPH_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['DECRYPTINGRAPH_MESSAGE']) 
         decryptGraph()
-        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['DECRYPTDONE_MESSAGE']) 
+        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['DECRYPTDONE_MESSAGE']) 
 
 def get_dispatcher():
     # bot_persistence = PicklePersistence(filename='persistence')
