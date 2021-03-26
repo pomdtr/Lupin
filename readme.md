@@ -1,165 +1,38 @@
-# Who am I ?
-Hey I am Lupin, an Open Source [Telegram](https://telegram.org/) [Python Chat Bot](https://github.com/python-telegram-bot/python-telegram-bot) build to supercharge your [LogSeq](https://github.com/logseq/logseq/) with great features like 
-Interstitial Journaling | Flashcards | Brainmaps | PDF / Web Annotations |  {TODO; DOING; LATER} | Bookmarks | Images upload and more
+# Deta Runner for Lupin
+
+## Notable changes
+
+Some features of Lupin requires to persist a dump of you Github repository. Deta only provides a read-only file system for your apps, and the worker on which your app run frequently switches.
+
+Due to these limitations, some features were disabled:
+
+- Generation of MindMaps
+- Markdown Export (but this is natively supported by Logseq in 0.0.14)
+- Space repetition
+
+I did not test the encryption because I am not interested in this feature.
+
+## Installation Guide for Deta Deployement
+
+1. Clone me: https://github.com/pomdtr/Lupin
+1. Fill your secrets
+  1. [Create a telegram bot](https://core.telegram.org/bots#creating-a-new-bot)
+  1. Generate a Github token from https://github.com/settings/tokens
+  1. `mv env.sample .env`
+  1. Add your tokens to the envfile
+1. Configure Lupin using the config.ini file (`mv config.sample.ini config.ini`)
+1. Install deta and deploy your app
+  1. Create an account in Deta
+  1. [Install the deta cli](https://docs.deta.sh/docs/cli/install)
+  1. Create a new micro: 'deta new lupin'
+  1. Add your credentials to your micro: `deta update -e .env`
+  1. Deploy you app: `deta deploy`
+1. Configure the webhook
+   1. `curl --header 'Content-Type: application/json' --data '{"url": "<micro-url>/webhook"}' 'https://api.telegram.org/bot<your-deta-token>/setWebhook'`
+1. Add a cron to deta if you want an automatically generated calendar
+  1. `deta cron set "one day"
 
 
-# Getting Started
-There are two methods to deploy Lupin. You can install it manaully or your can use Docker. Either method will require that you place information in a `config.ini` file.
+# Original Readme
 
-## Manually via Python and PIP:
-Assuming you are already using [LogSeq](https://logseq.com) & are familar with Python.
-
-Lupin requires Python version >= 3.x
-
-1. Clone me `git clone https://github.com/akhater/Lupin`
-1. [Create a telegram bot](https://core.telegram.org/bots#creating-a-new-bot)
-1. Install [Python Telegram Bot](https://github.com/python-telegram-bot/python-telegram-bot) library using `pip install python-telegram-bot` or `pip3 install python-telegram-bot`
-1. Install [PyGithub](https://github.com/PyGithub/PyGithub) library using `pip install pyGitHub` or `pip3 install pyGitHub`
-1. Install the `requests` library using `pip install requests` or `pip3 install requests`
-1. Generate a Github token from `https://github.com/settings/tokens`
-1. Rename `config.sample.ini` to `config.ini`
-1. Change values in `config.ini` to fit your environment 
-1. Run the bot using `python main.py` or `python3 main.py` 
-
-## Docker
-The container is based off the [official python 3](https://hub.docker.com/_/python/) images.
-
-The only requirement is that you have [Docker](https://www.docker.com/) installed.
-
-Before pulling the container please follow these steps:
-1. Create a telegram bot: [https://core.telegram.org/bots#creating-a-new-bot](https://core.telegram.org/bots#creating-a-new-bot)
-1. Generate a Github personal token from [https://github.com/settings/tokens](https://github.com/settings/tokens)
-1. Download [config.sample.ini](https://raw.githubusercontent.com/akhater/Lupin/master/config.sample.ini) and save it as`config.ini`
-1. Change values in `config.ini` to fit your environment 
-
-**Note**: That if you do not change the time zone _(TZ)_ your timestamp will reflect Eastern US Time _(America/New_York)_. You can see a [list of time zones here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) that way you can have the timestamp reflect a time zone of your choosing.
-
-You can run an instance of Lupin where your `config.ini` is located by typing this in your terminal:
-```
-docker run -d \
---name lupin \
---mount type=bind,source=$(pwd)/config.ini,target=/app/config.ini \
--e TZ=America/New_York \
---restart unless-stopped \
-digitalknk/lupin
-```
-
-You could also create a `docker-compose.yaml` file and copy/paste the text from below or [download it](https://raw.githubusercontent.com/akhater/Lupin/master/docker-compose.yaml) from the repo, save it where your `config.ini` is located. You can then deploy Lupin by typing this in your terminal `docker-compose up -d` in the same directory.
-
-```
-version: "3.2"
-services:
-  lupin:
-    container_name: lupin
-    image: digitalknk/lupin
-    volumes:
-      - type: bind
-        source: ./config.ini
-        target: /app/config.ini
-    environment:
-      TZ: America/New_York
-    restart: unless-stopped
-```
-
-When a new update to the container is released, you can update your pulled image by running one of these depending your deployment strategy where your `config.ini` is located:
-
-If you used the `docker run` command:
-```
-docker stop lupin
-docker rm lupin
-docker run -d \
---name lupin \
---mount type=bind,source=$(pwd)/config.ini,target=/app/config.ini \
--e TZ=America/New_York \
---restart unless-stopped \
-digitalknk/lupin
-```
-
-If a `docker-compose.yaml` is used:
-```
-docker-compose stop
-docker-compose rm -f
-docker-compose pull   
-docker-compose up -d
-```
-
-# Features
-* Privacy always - self hosted & open source
-* Security 
-    * Entries are only accepted from telegram BotAuthorizedIDs so not anyone can add entries to your journal
-* Fully customization with config.ini file
-   * Rename it
-   * Translate it (no hard coded messages)
-   * much more
-* Send a thought (any text) and Lupin will make your Interstitial Journaling a breeze 
-   * Timestamp it: supporting both 12 and 24 hrs format
-   * You can also turn off the timestamp all together if that's what you want 
-   * Enter it in your Github hosted Jounral 
-* Send your TODO list (by including TODO in the text) and Lupin will convert it to a LogSeq TODO
-    * TODO command is customizable
-* Send a link and Lupin automatically create a #bookmark entry in your Journal in the form of 
-    * 18:48 #bookmark [title](link)
-    * #bookmark tag is customizable 
-* Send a YouTube video link and Lupin will automatically embedded in your Journal in the form of 
-    * 18:52 {{Youtube link}}
-* Send `/anno uri` to import all your annotations from for the uri from [Hypothesis](https://web.hypothes.is/)
-* Support for both LogSeq regular Journal and custom Journal folder and/or file
-* Spaced Repetion: Spaced Repetition capabilities based on SuperMemo2 Algorithm 
-* Calendar Generation: Auto generates [PiotrSss](https://piotrsss.github.io/logseq-tools/public/#/mini-calendar) calendar and puts them in the sidebar
-* Theme Switcher: Switch between multiple themes by calling /themes
-* Generate Mindmaps of your pages by called /getMM PageTitle
-* Support for [AGE encryption](https://age-encryption.org/) and encrypted Graphs
-## Spaced Repetition
-Supported format for flaschards is
-```
-## #flashcardtag
-### Question 1
-#### answer line 1
-#### answer line 2
-### Question 2
-#### Answer 2
-```
-Flashcard tag is customizable
-Algorithm used is SuperMemo2
-Triggers are 
-/tsr import --> scan - import - update your flashcards
-/tsr x -> retrieve x flashcards from you pending pool
-/tsr -> retrieve the default number of cards set in your config .ini file
-Below entry in config.ini specifies you default number of flashcards
-```
-[TimeSpacedRepetion]
-flashcardDailyGoal=10
-```
-## Theme Switcher
-Before being able to use this feature you need to name your various themes in the format `ThemeName.custom.css` and place them in the /logseq folder
-
-## Commands summary 
-| Command          | Description                                   |
-|------------------|-----------------------------------------------|
-| /start           | Just a greeting                               |
-| /uptime          | returns Lupin Uptime                          |
-| /ver             | returns Lupin running Version                 |
-| /help            | help command (WIP)                            |
-| /anno URL        | Import hypothesis annotations from URL        |
-| /importFC        | Imports your Flashcards into Lupin            |
-| /srs import      | alias of /importFC                            |
-| /srs x           | starts a round of SRS for x flashcards        |
-| /getMM pageTitle | Generates a dynamic MindMap for pageTitle     |
-| /pullNow         | Pulls all pages from your Git for fast access |
-| /themes          | calls the theme changer                       |
-| /encryptAll      | Encrypts all your pages with AGE keys         |
-| /decryptAll      | Decrypts all your pages back to clear text    |
-## Screenshots
-Imported [Hypothesis](https://web.hypothes.is/) notes into LogSeq
-![](https://media.discordapp.net/attachments/808007880988426250/808378985016721408/unknown.png?width=998&height=821)
-# Credits
-* [Python Telegram Bot](https://github.com/python-telegram-bot/python-telegram-bot)
-* [PyGithub](https://github.com/PyGithub/PyGithub)
-* [LogSeq](https://github.com/logseq/logseq/)
-* [Hypothesis](https://web.hypothes.is/)
-* [PiotrSss](https://piotrsss.github.io/logseq-tools/public/#/mini-calendar)
-* [Doctorpangloss](https://gist.github.com/doctorpangloss/13ab29abd087dc1927475e560f876797)
-* [Markmap](https://markmap.js.org/)
-* [PyAge](https://github.com/jojonas/pyage/tree/master/src/age)
-## License
-[MIT License](./LICENSE)
+See https://github.com/akhater/Lupin/blob/master/readme.md

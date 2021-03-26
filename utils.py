@@ -143,7 +143,7 @@ def saveasJson(content, file):
         json.dump(content, outfile)
 
 def findOrigBlock(ref):
-    with open('GitDump.json') as json_file:
+    with open('/tmp/GitDump.json') as json_file:
         AllFilesContent = json.load(json_file)
 
     origBlock = ""
@@ -163,7 +163,7 @@ def findOrigBlock(ref):
 def scanJson4Flashcards():
   # from git import Git2Json 
   # Git2Json() 
-  with open('GitDump.json') as json_file:
+  with open('/tmp/GitDump.json') as json_file:
     AllFilesContent = json.load(json_file)
 
   flashcardsList = []
@@ -180,7 +180,7 @@ def convert2MD(pageTitle):
   # from git import Git2Json 
   # Git2Json()
 
-  with open('GitDump.json') as json_file:
+  with open('/tmp/GitDump.json') as json_file:
     AllFilesContent = json.load(json_file)  
  
   for content in AllFilesContent:
@@ -225,7 +225,7 @@ def convert2Mindmap(pageTitle):
   # from git import Git2Json 
   # Git2Json()
 
-  with open('GitDump.json') as json_file:
+  with open('/tmp/GitDump.json') as json_file:
     AllFilesContent = json.load(json_file)  
 
   for content in AllFilesContent:
@@ -237,7 +237,7 @@ def pageExists(pageTitle):
   # from git import Git2Json 
   # Git2Json()
 
-  with open('GitDump.json') as json_file:
+  with open('/tmp/GitDump.json') as json_file:
     AllFilesContent = json.load(json_file)  
 
   for content in AllFilesContent:
@@ -326,11 +326,12 @@ def styleDateTime(dt,f):
 
 
 def getJournalTitle():
-  return styleDateTime(datetime.now(), getdateFormatter())
+  import config
+  return styleDateTime(datetime.now(), config.dateFormat)
 
 
 def getJournalTemplate():
-  with open('GitDump.json') as json_file:
+  with open('/tmp/GitDump.json') as json_file:
     AllFilesContent = json.load(json_file)  
       
   for content in AllFilesContent:

@@ -60,7 +60,7 @@ def updateJournal(entry, needsBuilding=True, path=None, overwrite=False, alias='
         push(path, git_messages['COMMIT_MESSAGE'].format(BotName, utils.getTimestamp()) , data, GitHubBranch, update=True)
     else:
         if isJournalFile:
-            journalTemplate = utils.getJournalTemplate()
+            journalTemplate = config.journalTemplate
             if journalTemplate:
                 data =  "---\ntitle: " + utils.getJournalTitle() + "\n---\n\n" + journalTemplate + (entry).strip() + "\n"
             else:
@@ -190,7 +190,7 @@ def Git2Json(path=""):
                 if gitFileContent:
                     AllFilesContent.append(gitFileContent)
                     
-    utils.saveasJson(AllFilesContent,"GitDump.json")
+    utils.saveasJson(AllFilesContent,"/tmp/GitDump.json")
 
 def updateCalendarsFile():
     path = "pages/" + config.getcalendarFile()

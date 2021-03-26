@@ -151,4 +151,12 @@ persistence
 # .archive/
 .archive/
 flashcards.db
-gitDump.json
+GitDump.json
+
+.venv
+
+# Secrets
+.env
+
+# Deta config
+.deta

@@ -1,5 +1,6 @@
-from telegram.ext import CallbackQueryHandler, CommandHandler, Filters, MessageHandler, PicklePersistence, Updater
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackQueryHandler, CommandHandler, Filters, MessageHandler, PicklePersistence, Dispatcher
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, Message, Bot
+from queue import Queue
 from io import BytesIO, StringIO
 from uuid import uuid4
 
@@ -12,27 +13,27 @@ from config import (
 )
 
 from dictionaries import bot_messages, btns
-from git import updateJournal, updateAsset, Git2Json, updateCalendarsFile, encryptGraph, decryptGraph, getAllThemes, switchTheme #, updateFlashCards
+from git import updateJournal, updateAsset, updateCalendarsFile, encryptGraph, decryptGraph, getAllThemes, switchTheme, Git2Json
 from utils import getUptime, getAnnotationPath, getPageTitle, getWebPageTitle, getlatestNews, updateFlashCards, convert2MD, convert2Mindmap
 from hypothesis import getHypothesisAnnotations
 
 
 def start(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['WELCOME_MESSAGE'].format(BotName)) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['WELCOME_MESSAGE'].format(BotName)) 
 
 def uptime(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
         message = "I've been up for %d days, %d hours, %d minutes, %d seconds" % getUptime()
-        context.bot.send_message(chat_id=update.effective_chat.id, text=message) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message) 
 
 def addEntry(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
         updateJournal(update.message.text)
         context.bot.send_message(chat_id=update.effective_chat.id,
@@ -40,24 +41,24 @@ def addEntry(update, context):
 
 def version(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['VER_MESSAGE'].format(BotName,getBotVersion())) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['VER_MESSAGE'].format(BotName,getBotVersion())) 
 
 def help(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
         commands = ["/help","/start","/uptime","/ver","/anno"]
         message = bot_messages['HELP_MESSAGE']
         for command in commands:
             message += command + "\n"
         
-        context.bot.send_message(chat_id=update.effective_chat.id, text=message) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message) 
 
 def hypothesis(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
         if(isManageHypothesis()):
             path = getAnnotationPath(context.args[0])
@@ -78,7 +79,7 @@ def hypothesis(update, context):
     
 def image_handler(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
         # print ( context.bot.getFile(update.message.photo[-1]))
         file = context.bot.getFile(update.message.photo[-1].file_id)
@@ -86,13 +87,13 @@ def image_handler(update, context):
         path = updateAsset(f.getvalue(),"jpg")
         updateJournal(path, ignoreURL=True, isJournalFile=False)
         
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['IMAGEUPLOAD_MESSAGE'].format(BotName,getBotVersion())) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['IMAGEUPLOAD_MESSAGE'].format(BotName,getBotVersion())) 
 
 def generateMD(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['FILEREQ_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['FILEREQ_MESSAGE']) 
         PageName = str(' '.join(context.args))
         
         s = StringIO()
@@ -109,11 +110,11 @@ def generateMD(update, context):
 
 def generateMinmapHTML(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
         PageName = str(' '.join(context.args))
         if PageName:
-            context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['FILEREQ_MESSAGE']) 
+            context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['FILEREQ_MESSAGE']) 
 
 
             MindMap = convert2Mindmap(PageName)
@@ -160,13 +161,13 @@ def generateMinmapHTML(update, context):
 
                 context.bot.send_document(chat_id=update.message.chat_id, document=buf)
             else:
-                context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['FILENOTFOUND_MESSAGE'].format(PageName)) 
+                context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['FILENOTFOUND_MESSAGE'].format(PageName)) 
         else:
-            context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['NOPAGEMM_MESSAGE']) 
+            context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['NOPAGEMM_MESSAGE']) 
             
 def listAllThemes(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
         AllThemes = getAllThemes()
         button_list = []
@@ -176,7 +177,7 @@ def listAllThemes(update, context):
             i+=1
         button_list.append([InlineKeyboardButton(btns['CANCEL'], callback_data=btns['CANCEL'])])
         reply_markup =  InlineKeyboardMarkup(button_list)
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['PICKTHEME_MESSAGE'], reply_markup=reply_markup) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['PICKTHEME_MESSAGE'], reply_markup=reply_markup) 
 
 def ThemeSwitcher(update, context):
     args = update.callback_query.data.split('_')
@@ -205,13 +206,13 @@ def ShowSkipCancelMenu(update, context, uid):
     message = bot_messages['LINE_BREAK'] + "\n\n" + context.user_data[uid][0].question + "\n" + bot_messages['LINE_BREAK'] + "\n" 
     message += bot_messages['FLASHCARD_OPTIONS']
     reply_markup =  InlineKeyboardMarkup(button_list)
-    context.bot.send_message(chat_id=update.effective_chat.id, text=message, reply_markup=reply_markup) 
+    context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message, reply_markup=reply_markup) 
 
 def ShowAnswer(update,context):
     uid = update.callback_query.data.replace(btns['SHOW_ANSWER'],'')
     flashcard = context.user_data[uid][0]
     message = flashcard.answer + "\n" + bot_messages['FLASHCARD_SOURCE'] + flashcard.source 
-    context.bot.send_message(chat_id=update.effective_chat.id, text=message) 
+    context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message) 
 
 def AnswerHandler(update, context):
     args = update.callback_query.data.split('_')
@@ -232,7 +233,7 @@ def AnswerHandler(update, context):
         context.user_data[uid] = [flashcard, roundCount, roundGoal]
         TimeSpacedRepetition(update, context, uid)
     else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text="All Done for Today ") 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text="All Done for Today ") 
 
 def Cancel(update,context):
     context.bot.edit_message_text(
@@ -252,7 +253,7 @@ def Skip(update, context):
 
 def TimeSpacedRepetition(update, context, uid=""):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
         try:
             arg = context.args[0]
@@ -276,98 +277,96 @@ def TimeSpacedRepetition(update, context, uid=""):
             flashcard = flashcards.getFlashcardFromPool()
             if(flashcard):
                 message = "Card " + str(roundCount) + " out of " + str(roundGoal) + "\n" 
-                context.bot.send_message(chat_id=update.effective_chat.id, text=message) 
+                context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message) 
                 context.user_data[uid] = [flashcard, roundCount, roundGoal]
                 return ShowSkipCancelMenu(update, context, uid)
             else:
-                context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['NOPENDIGCARDS_MESSAGE'])  
+                context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['NOPENDIGCARDS_MESSAGE'])  
 
 def tsrRetired(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
         message = "command /tsr is being replace by /srs please use the latter from now on"
-        context.bot.send_message(chat_id=update.effective_chat.id, text=message) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message) 
 
 def importFlashCards(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE'].format(update.effective_chat.id)) 
     else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['IMPORTINGFC_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['IMPORTINGFC_MESSAGE']) 
         importResults = updateFlashCards()
         message = bot_messages['IMPORTEDFC_MESSAGE'].format(importResults[0],importResults[1])
-        context.bot.send_message(chat_id=update.effective_chat.id, text=message) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=message) 
 
 def scheduleHousekeeping(chat_id, context):
     context.job_queue.run_repeating(scheduledHousekeeping, interval=getGitHubUpdateFrequency(), first=10,
                                     context=chat_id)
     # print(context.job_queue.jobs())
 
-def scheduledHousekeeping(context):
+def scheduledHousekeeping():
     print("Scheduled Housekeeping ...")
-    if isGraphAgeEncrypted():
-        generateAgeKeyFile()
+    # if isGraphAgeEncrypted():
+    #     generateAgeKeyFile()
 
-    Git2Json()
+    # Git2Json()
     if isCalendarsAutogenerated():
         updateCalendarsFile()
 
 def pullnow(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
         print("Unscheduled Housekeeping ...")
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['PULL_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['PULL_MESSAGE']) 
         Git2Json() 
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['PULLDONE_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['PULLDONE_MESSAGE']) 
 
 def encryptall(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['ENCRYPTINGRAPH_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['ENCRYPTINGRAPH_MESSAGE']) 
         encryptGraph()
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['ENCRYPTDONE_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['ENCRYPTDONE_MESSAGE']) 
 
 
 def decryptall(update, context):
     if(not isBotAuthorized(update.effective_chat.id)):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['UNAUTHORIZED_MESSAGE']) 
     else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['DECRYPTINGRAPH_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['DECRYPTINGRAPH_MESSAGE']) 
         decryptGraph()
-        context.bot.send_message(chat_id=update.effective_chat.id, text=bot_messages['DECRYPTDONE_MESSAGE']) 
+        context.bot.send_message(disable_notification=True, chat_id=update.effective_chat.id, text=bot_messages['DECRYPTDONE_MESSAGE']) 
 
-def main():
-    bot_persistence = PicklePersistence(filename='persistence')
+def get_dispatcher():
+    # bot_persistence = PicklePersistence(filename='persistence')
 
-    updater = Updater(token=BotToken, persistence=bot_persistence, use_context=True)
-    dispatcher = updater.dispatcher
+    bot = Bot(BotToken)
+    dispatcher = Dispatcher(bot=bot, update_queue=None, use_context=True)
 
     # if(isNewer()):
     #     for BotAuthorizedId in getBotAuthorizedIDs():
     #         updater.bot.sendMessage(chat_id=BotAuthorizedId, text=bot_messages['VERCHANGE_MESSAGE'])
 
-    latestNews = getlatestNews()
-    for news in latestNews:
-        for BotAuthorizedId in getBotAuthorizedIDs():
-            updater.bot.sendMessage(chat_id=BotAuthorizedId, text=news)
+    # latestNews = getlatestNews()
+    # for news in latestNews:
+    #     for BotAuthorizedId in getBotAuthorizedIDs():
+    #         updater.bot.sendMessage(chat_id=BotAuthorizedId, text=news)
     
-    scheduleHousekeeping(getBotAuthorizedIDs()[0],updater)
+    # scheduleHousekeeping(getBotAuthorizedIDs()[0],updater)
 
-    # context.job_queue.run_repeating(callback_minute, interval=10, first=30,context=update.message.chat_id)
-    # dispatcher.add_handler(CommandHandler('timer', timer, pass_job_queue=True))
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('uptime', uptime))
     dispatcher.add_handler(CommandHandler('ver', version))
     dispatcher.add_handler(CommandHandler('help', help))
     dispatcher.add_handler(CommandHandler('anno', hypothesis))   
-    dispatcher.add_handler(CommandHandler('importFC', importFlashCards))   
-    dispatcher.add_handler(CommandHandler('tsr', tsrRetired))   
-    dispatcher.add_handler(CommandHandler('srs', TimeSpacedRepetition))   
+    # dispatcher.add_handler(CommandHandler('importFC', importFlashCards))   
+    # dispatcher.add_handler(CommandHandler('tsr', tsrRetired))   
+    # dispatcher.add_handler(CommandHandler('srs', TimeSpacedRepetition))   
     # dispatcher.add_handler(CommandHandler('getMD', generateMD))   
-    dispatcher.add_handler(CommandHandler('getMM', generateMinmapHTML))   
-    dispatcher.add_handler(CommandHandler('pullnow', pullnow))   
+    # dispatcher.add_handler(CommandHandler('getMM', generateMinmapHTML)) TODO
+    # dispatcher.add_handler(CommandHandler('pullnow', pullnow))   
     dispatcher.add_handler(CommandHandler('themes', listAllThemes))   
     dispatcher.add_handler(CommandHandler('encryptall', encryptall))   
     dispatcher.add_handler(CommandHandler('decryptall', decryptall))   
@@ -375,15 +374,35 @@ def main():
     dispatcher.add_handler(MessageHandler(Filters.text, addEntry))
     dispatcher.add_handler(MessageHandler(Filters.photo, image_handler))
 
-    dispatcher.add_handler(CallbackQueryHandler(ShowAnswer,pattern=btns['SHOW_ANSWER'])) 
-    dispatcher.add_handler(CallbackQueryHandler(AnswerHandler,pattern="ansrfdbk"))
-    dispatcher.add_handler(CallbackQueryHandler(Skip,pattern=btns['SKIP']))  
-    dispatcher.add_handler(CallbackQueryHandler(Cancel,pattern=btns['CANCEL']))  
+    # dispatcher.add_handler(CallbackQueryHandler(ShowAnswer,pattern=btns['SHOW_ANSWER'])) 
+    # dispatcher.add_handler(CallbackQueryHandler(AnswerHandler,pattern="ansrfdbk"))
+    # dispatcher.add_handler(CallbackQueryHandler(Skip,pattern=btns['SKIP']))  
+    # dispatcher.add_handler(CallbackQueryHandler(Cancel,pattern=btns['CANCEL']))  
     dispatcher.add_handler(CallbackQueryHandler(ThemeSwitcher,pattern="ThemeSwitcher"))
 
+    return dispatcher
 
-    updater.start_polling()
-    updater.idle()
+dispatcher = get_dispatcher()
+# a POST route for our webhook events
+from fastapi import FastAPI, Request
+from deta import App
 
-if __name__ == '__main__':
-    main()
+app = App(FastAPI())
+
+@app.get('/')
+def hello_world():
+    return "Hello World!"
+
+@app.post("/webhook")
+async def webhook_handler(req: Request):
+    import os
+
+    data = await req.json()
+    update = Update.de_json(data, dispatcher.bot)
+    dispatcher.process_update(update)
+    
+@app.lib.cron()
+def updateCalendar(event):
+    Git2Json()
+    scheduledHousekeeping()
+    dispatcher.bot.send_message(chat_id=1751933281, text="Updated!")

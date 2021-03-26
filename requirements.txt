@@ -4,3 +4,4 @@ python_telegram_bot==12.4.2
 beautifulsoup4==4.9.3
 PyGithub==1.54.1
 telegram==0.0.1
+fastapi
