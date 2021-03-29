@@ -18,7 +18,7 @@ I did not test the encryption because I am not interested in this feature.
 1. Fill your secrets
     1. [Create a telegram bot](https://core.telegram.org/bots#creating-a-new-bot)
     1. Generate a Github token from https://github.com/settings/tokens
-    1. `mv env.sample .env`
+    1. `mv sample.env .env`
     1. Add your tokens to the envfile
 1. Configure Lupin using the config.ini file (`mv config.sample.ini config.ini`)
 1. Install deta and deploy your app
@@ -28,9 +28,9 @@ I did not test the encryption because I am not interested in this feature.
     1. Add your credentials to your micro: `deta update -e .env`
     1. Deploy you app: `deta deploy`
 1. Configure the webhook
-   1. `curl --header 'Content-Type: application/json' --data '{"url": "<micro-url>/webhook"}' 'https://api.telegram.org/bot<your-deta-token>/setWebhook'`
+   1. `curl --header 'Content-Type: application/json' --data '{"url": "<micro-url>/webhook"}' 'https://api.telegram.org/bot<your-telegram-bot-token>/setWebhook'`
 1. Add a cron to deta if you want an automatically generated calendar
-    1. `deta cron set "one day"
+    1. `deta cron set "1 day"`
 
 
 # Original Readme
